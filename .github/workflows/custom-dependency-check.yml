@@ -1,0 +1,43 @@
+name: Custom Dependency Check
+
+on:
+  schedule:
+    - cron: "0 6 * * 1"   # Runs every Monday at 06:00 UTC
+  workflow_dispatch:
+
+jobs:
+  dependency-audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Check for outdated dependencies
+        run: |
+          echo "Checking for outdated packages..."
+          npm outdated || true
+          echo "Dependency check complete."
+
+      - name: Run tests after checking
+        run: |
+          if npm run | grep -q "test"; then
+            npm test
+          else
+            echo "No test script defined — skipping"
+          fi
+
+      - name: Generate summary report
+        run: |
+          echo "## Dependency Update Report" >> $GITHUB_STEP_SUMMARY
+          echo "Checked for outdated dependencies on $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          npm outdated >> $GITHUB_STEP_SUMMARY || echo "All dependencies up to date." >> $GITHUB_STEP_SUMMARY
