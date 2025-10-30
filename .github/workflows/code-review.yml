@@ -1,0 +1,72 @@
+name: Code Review and Security Analysis
+
+on:
+  pull_request:        # Runs automatically for every PR
+    branches: [main]
+
+jobs:
+  lint-and-analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+
+      - name: Install dependencies
+        run: npm install
+
+
+      - name: Run ESLint
+        run: |
+          if npm run | grep -q "lint"; then
+            npm run lint
+          else
+            echo "No lint script defined — skipping"
+          fi
+
+
+      - name: Run Tests
+        run: |
+          if npm run | grep -q "test"; then
+            npm test
+          else
+            echo "No test script defined — skipping"
+          fi
+
+  codeql-analysis:
+    name: CodeQL Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: javascript
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
