@@ -1,0 +1,36 @@
+name: Documentation Deployment
+
+
+on:
+  push:
+    paths:
+      - "docs/**"
+      - "README.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+
+      - name: Build documentation
+        run: |
+          echo "Building documentation..."
+          mkdir -p docs-build
+          cp -r docs/* docs-build/
+          echo "Documentation build complete."
+
+
+      - name: Deploy documentation
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./docs-build
