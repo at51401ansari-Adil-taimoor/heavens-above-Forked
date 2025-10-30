@@ -1,0 +1,26 @@
+name: Scheduled Maintenance Task
+
+# This workflow runs automatically once a week (Sunday at midnight)
+on:
+  schedule:
+    - cron: "0 0 * * 0"  # every Sunday at 00:00 UTC
+  workflow_dispatch:
+
+jobs:
+  maintenance:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Maintenance Script
+        run: |
+          echo "Starting weekly maintenance..."
+          date
+          echo "Performing cleanup tasks..."
+
+          echo "Maintenance complete!"
+
+      - name: Notify completion
+        run: echo " Weekly maintenance workflow finished successfully."
